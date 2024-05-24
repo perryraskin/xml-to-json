@@ -10,7 +10,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { url } = await request.json(); // Extract the URL from the request body
+    const { url, limit } = await request.json(); // Extract the URL from the request body
+    console.log(url, limit);
 
     // Fetch the XML content from the provided URL
     const response = await axios.get(url);
@@ -32,8 +33,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Return the JSON result
-    return NextResponse.json(jsonResult.rss.channel[0].item);
+    let result = jsonResult.rss.channel[0].item;
+    if (parseInt(limit) === 1) {
+      result = jsonResult.rss.channel[0].item.slice(0, limit)[0].description[0];
+    } else if (limit) {
+      result = jsonResult.rss.channel[0].item.slice(0, limit);
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Error converting XML to JSON:", error);
     return NextResponse.json(
