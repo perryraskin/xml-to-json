@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { url, limit } = await request.json(); // Extract the URL from the request body
+    const { url, limit, attribute } = await request.json(); // Extract the URL from the request body
     console.log(url, limit);
 
     // Fetch the XML content from the provided URL
@@ -35,7 +35,14 @@ export async function POST(request: NextRequest) {
 
     let result = jsonResult.rss.channel[0].item;
     if (parseInt(limit) === 1) {
-      result = jsonResult.rss.channel[0].item.slice(0, limit)[0].description[0];
+      if (attribute) {
+        result = jsonResult.rss.channel[0].item.slice(0, limit)[0][
+          attribute
+        ][0];
+      } else {
+        result = jsonResult.rss.channel[0].item.slice(0, limit)[0]
+          .description[0];
+      }
     } else if (limit) {
       result = jsonResult.rss.channel[0].item.slice(0, limit);
     }
